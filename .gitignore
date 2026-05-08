@@ -1,0 +1,6 @@
+# project env, modules, and build files
+.env
+build/
+install/
+log/
+xpad/

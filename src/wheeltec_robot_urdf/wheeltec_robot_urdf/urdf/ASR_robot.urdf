@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+<!-- Generated using onshape-to-robot -->
+<!-- Onshape https://cad.onshape.com/documents/087b1a61f2f93a193d55393a/w/3d126a4f7a4475c4f92c99ef/e/e0bc0db26592ca3ed454a693 -->
+<robot name="AMR_car_1">
+  <!-- Link base_link -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-09"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+    </inertial>
+    <!-- Part base_link -->
+    <visual>
+      <origin xyz="-0.080852 -0.13247 0.125931" rpy="3.14159 2.2094e-16 0"/>
+      <geometry>
+        <mesh filename="package://assets/base_link.stl"/>
+      </geometry>
+      <material name="base_link_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.080852 -0.13247 0.125931" rpy="3.14159 2.2094e-16 0"/>
+      <geometry>
+        <mesh filename="package://assets/base_link.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link left_front_link -->
+  <link name="left_front_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-09"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+    </inertial>
+    <!-- Part left_front_link -->
+    <visual>
+      <origin xyz="-3.46945e-18 -1.38778e-17 0.0015" rpy="1.5708 -0 0"/>
+      <geometry>
+        <mesh filename="package://assets/left_front_link.stl"/>
+      </geometry>
+      <material name="left_front_link_material">
+        <color rgba="0.745098 0.901961 0.960784 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.46945e-18 -1.38778e-17 0.0015" rpy="1.5708 -0 0"/>
+      <geometry>
+        <mesh filename="package://assets/left_front_link.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from base_link to left_front_link -->
+  <joint name="left_front_joint" type="continuous">
+    <origin xyz="0.104 0.088 0.0195" rpy="-1.5708 -1.5708 0"/>
+    <parent link="base_link"/>
+    <child link="left_front_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10"/>
+  </joint>
+  <!-- Link right_front_link -->
+  <link name="right_front_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-09"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+    </inertial>
+    <!-- Part right_front_link -->
+    <visual>
+      <origin xyz="0 0 -0.0015" rpy="-1.5708 -7.95042e-32 0"/>
+      <geometry>
+        <mesh filename="package://assets/right_front_link.stl"/>
+      </geometry>
+      <material name="right_front_link_material">
+        <color rgba="0.745098 0.901961 0.960784 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.0015" rpy="-1.5708 -7.95042e-32 0"/>
+      <geometry>
+        <mesh filename="package://assets/right_front_link.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from base_link to right_front_link -->
+  <joint name="right_front_joint" type="continuous">
+    <origin xyz="0.104 -0.088 0.0195" rpy="-1.5708 -5.55112e-16 1.10598e-15"/>
+    <parent link="base_link"/>
+    <child link="right_front_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10"/>
+  </joint>
+  <!-- Link right_wheel_link -->
+  <link name="right_wheel_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-09"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+    </inertial>
+    <!-- Part right_wheel_link -->
+    <visual>
+      <origin xyz="0 1.04083e-17 -0.0015" rpy="-1.5708 -0 -2.18953e-47"/>
+      <geometry>
+        <mesh filename="package://assets/right_wheel_link.stl"/>
+      </geometry>
+      <material name="right_wheel_link_material">
+        <color rgba="0.745098 0.901961 0.960784 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 1.04083e-17 -0.0015" rpy="-1.5708 -0 -2.18953e-47"/>
+      <geometry>
+        <mesh filename="package://assets/right_wheel_link.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from base_link to right_wheel_link -->
+  <joint name="right_wheel_joint" type="continuous">
+    <origin xyz="-0.104 -0.088 0.0195" rpy="-1.5708 -0 1.10598e-15"/>
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10"/>
+  </joint>
+  <!-- Link left_wheel_link -->
+  <link name="left_wheel_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-09"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+    </inertial>
+    <!-- Part left_wheel_link -->
+    <visual>
+      <origin xyz="0 0 0.0015" rpy="1.5708 -4.78631e-32 0"/>
+      <geometry>
+        <mesh filename="package://assets/left_wheel_link.stl"/>
+      </geometry>
+      <material name="left_wheel_link_material">
+        <color rgba="0.745098 0.901961 0.960784 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0015" rpy="1.5708 -4.78631e-32 0"/>
+      <geometry>
+        <mesh filename="package://assets/left_wheel_link.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from base_link to left_wheel_link -->
+  <joint name="left_wheel_joint" type="continuous">
+    <origin xyz="-0.104 0.088 0.0195" rpy="-1.5708 -5.55112e-16 5.31596e-16"/>
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10"/>
+  </joint>
+</robot>
