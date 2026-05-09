@@ -403,7 +403,7 @@ class VisualSensorNode(Node):
             label = "YOLO"
 
             if cls_id is not None and conf is not None:
-                label = f"Shin-chan | {conf * 100:.0f}%"
+                label = f"Tennis Ball | {conf * 100:.0f}%"
 
             cv2.putText(
                 image,
