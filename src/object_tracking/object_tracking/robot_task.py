@@ -196,7 +196,7 @@ class TaskNode(Node):
         # =========================
         # OUTPUT
         # =========================
-        twist.linear.x = clamp(depth_u, 0.5)
+        twist.linear.x = clamp(depth_u, 1.5)    # forward/backward speed limited to 1.5 m/s
         twist.angular.z = clamp(yaw_u, 1.5)
 
         self.pub.publish(twist)
