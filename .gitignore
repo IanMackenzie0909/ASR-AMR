@@ -1,6 +1,11 @@
 # project env, modules, and build files
+.vscode/
 .env
 build/
 install/
 log/
 xpad/
+
+# Python cache files
+*__pycache__/
+object_tracking/__pycache__/

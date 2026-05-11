@@ -190,13 +190,22 @@ class TaskNode(Node):
                                 depth_error, pe_depth, te_depth)
         pe_depth = depth_error
 
+        """ 
+        safety check (when OBJECT's depth is less than 0.35m) 
+        to prevent the robot from crashing into the target. 
+        """
+        if e_depth < 0.35:
+            self.debug_print("TOO CLOSE -> STOP")
+            self.stop()
+            return
+        
         if e_depth < 0.5:
             depth_u = - 0.1
 
         # =========================
         # OUTPUT
         # =========================
-        twist.linear.x = clamp(depth_u, 1.5)    # forward/backward speed limited to 1.5 m/s
+        twist.linear.x = clamp(depth_u, 0.5)    # forward/backward speed limited to 0.5 m/s
         twist.angular.z = clamp(yaw_u, 1.5)
 
         self.pub.publish(twist)
