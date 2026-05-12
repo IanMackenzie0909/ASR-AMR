@@ -17,7 +17,4 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
-# Process subdirectories containing ROS packages
-add_subdirectory(src)
-
 ament_package()
