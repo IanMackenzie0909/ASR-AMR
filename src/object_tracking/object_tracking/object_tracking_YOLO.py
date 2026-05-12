@@ -72,7 +72,8 @@ class VisualSensorNode(Node):
         # -------------------------
         default_model_path = str(Path(__file__).with_name("best.pt"))
         self.declare_parameter("model_path", default_model_path)
-        self.declare_parameter("confidence_threshold", 0.75)
+        # Only keep detection boxes whose confidence >= 0.75 (Testing: < 0.70)
+        self.declare_parameter("confidence_threshold", 0.50)
         self.model_path = self.get_parameter("model_path").value
         self.conf_thres = float(self.get_parameter("confidence_threshold").value)
 

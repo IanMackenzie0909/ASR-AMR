@@ -10,10 +10,13 @@ The workspace is organized as a standard `colcon` project:
 ```text
 ASR-AMR/
 |-- src/
+|   |-- LLM_path_generator/     # AI path generate
 |   |-- robot_controller/       # ASR base serial controller and launch files
 |   |-- joy2cmd/                # Joystick-to-/cmd_vel bridge
 |   |-- keyboard_control/       # Keyboard teleoperation helper
+|   |-- object_tracking/        # HSV and YOLO visual target tracking
 |   |-- path_planning/          # Fixed Nav2 goal sender example
+|   |-- tracking_msg/           # Custom visual tracking message interface
 |   |-- wheeltec_robot_nav2/    # Nav2 bringup, maps, params, RViz config
 |   |-- wheeltec_robot_slam/    # gmapping, Cartographer, slam_toolbox wrappers
 |   |-- wheeltec_robot_urdf/    # Robot URDFs, meshes, RViz model config
@@ -32,6 +35,10 @@ ASR-AMR/
 - EKF fusion through `robot_localization`.
 - Joystick control through `joy` and `joy2cmd`.
 - Keyboard teleoperation through `keyboard_control`.
+- Visual target tracking with HSV thresholding or YOLO.
+- Visual servo control from target yaw/depth errors to `/cmd_vel`.
+- Custom `tracking_msg/msg/Imgtracking` interface for target validity,
+  normalized yaw error, depth, confidence, and class ID.
 - Optional SLAM packages for gmapping, Cartographer, and slam_toolbox.
 
 ## Main Packages
@@ -45,6 +52,8 @@ ASR-AMR/
 | `ldlidar_stl_ros2` / `ldlidar_sl_ros2` | LD06, LD14, and LD19 lidar drivers. |
 | `joy2cmd` | Converts `/joy` joystick messages to `/cmd_vel`. |
 | `keyboard_control` | Publishes simple keyboard-driven `/cmd_vel` messages. |
+| `object_tracking` | Camera-based target detection, HSV tuning, YOLO detection, and visual servo task control. |
+| `tracking_msg` | Defines `Imgtracking`, the message shared by the detector and tracking controller. |
 | `path_planning` | Sends a fixed `NavigateToPose` goal to Nav2. |
 | `slam_gmapping`, `wheeltec_cartographer`, `wheeltec_slam_toolbox` | SLAM-related packages and launch wrappers. |
 
@@ -72,11 +81,19 @@ sudo apt install \
   ros-${ROS_DISTRO}-imu-filter-madgwick \
   ros-${ROS_DISTRO}-joint-state-publisher \
   ros-${ROS_DISTRO}-robot-state-publisher \
+  ros-${ROS_DISTRO}-cv-bridge \
   ros-${ROS_DISTRO}-joy \
   ros-${ROS_DISTRO}-tf-transformations \
   ros-${ROS_DISTRO}-slam-toolbox \
+  python3-opencv \
   libpcap-dev \
   libpcl-dev
+```
+
+The YOLO visual tracker also requires the Python `ultralytics` package:
+
+```bash
+python3 -m pip install ultralytics
 ```
 
 You can also ask `rosdep` to install dependencies declared by the packages:
@@ -105,7 +122,8 @@ source install/setup.bash
 If you only want to rebuild the project-specific Python packages while working:
 
 ```bash
-colcon build --symlink-install --packages-select robot_controller joy2cmd keyboard_control path_planning
+colcon build --symlink-install --packages-select \
+  robot_controller joy2cmd keyboard_control path_planning tracking_msg object_tracking
 source install/setup.bash
 ```
 
@@ -176,6 +194,69 @@ Keyboard keys:
 | `d` | Strafe right |
 | `Ctrl-C` | Exit |
 
+## Visual Object Tracking
+
+The `object_tracking` package provides two detector nodes and one controller
+node. Both detectors publish `tracking_msg/msg/Imgtracking` on
+`/Visual_sensor_vel`, and `robot_task` subscribes to that topic to publish
+visual-servo velocity commands on `/cmd_vel`.
+
+Camera topics expected by the detector nodes:
+
+| Topic | Type | Description |
+| --- | --- | --- |
+| `/camera/camera/color/image_raw` | `sensor_msgs/msg/Image` | RGB image stream. |
+| `/camera/camera/aligned_depth_to_color/image_raw` | `sensor_msgs/msg/Image` | Depth image aligned to the RGB frame. |
+
+YOLO tracking uses the bundled model at
+`src/object_tracking/object_tracking/best.pt` by default. It keeps the
+highest-confidence detection above the configured threshold, estimates distance
+from the center area of the aligned depth image, and publishes:
+
+- `target_visible`: true only when a usable target and depth are available.
+- `yaw`: normalized horizontal error, where positive means the target is left of
+  image center.
+- `depth`: target distance in meters, or `-1.0` when invalid.
+- `confidence`: selected detector confidence.
+- `class_id`: selected detector class ID.
+
+Run YOLO detection:
+
+```bash
+source install/setup.bash
+ros2 run object_tracking object_tracking_YOLO
+```
+
+You can override the model path or confidence threshold:
+
+```bash
+ros2 run object_tracking object_tracking_YOLO --ros-args \
+  -p model_path:=/path/to/best.pt \
+  -p confidence_threshold:=0.50
+```
+
+Run HSV color tracking instead:
+
+```bash
+ros2 run object_tracking object_tracking_img
+```
+
+Tune HSV thresholds and save them to
+`src/object_tracking/object_tracking/hsv_values.json`:
+
+```bash
+ros2 run object_tracking hsv_adjust
+```
+
+Run the visual servo controller after starting one detector:
+
+```bash
+ros2 run object_tracking robot_task
+```
+
+`robot_task` stops the robot when target data is stale, no target is visible, or
+depth is invalid. It also stops when the target is closer than `0.35 m`.
+
 ## Navigation
 
 The main Nav2 launch file starts the robot base stack and then launches
@@ -230,6 +311,9 @@ ros2 launch wheeltec_nav2 save_map.launch.py
 | `/imu/data_raw` | `sensor_msgs/msg/Imu` | Raw IMU data from the ASR controller. |
 | `/scan` | `sensor_msgs/msg/LaserScan` | Lidar scan topic used by Nav2 and SLAM. |
 | `/joy` | `sensor_msgs/msg/Joy` | Joystick input used by `joy2cmd`. |
+| `/camera/camera/color/image_raw` | `sensor_msgs/msg/Image` | RGB input for visual tracking. |
+| `/camera/camera/aligned_depth_to_color/image_raw` | `sensor_msgs/msg/Image` | Aligned depth input for visual tracking. |
+| `/Visual_sensor_vel` | `tracking_msg/msg/Imgtracking` | Visual target state from `object_tracking` detector nodes. |
 | `/navigate_to_pose` | `nav2_msgs/action/NavigateToPose` | Nav2 action server used by `path_planning`. |
 
 ## Troubleshooting
@@ -274,10 +358,29 @@ Then check that `/scan` is publishing:
 ros2 topic echo /scan
 ```
 
+### Visual tracking is not publishing
+
+Check that the camera topics exist:
+
+```bash
+ros2 topic list | grep camera
+```
+
+Then inspect the tracking output:
+
+```bash
+ros2 topic echo /Visual_sensor_vel
+```
+
+If the YOLO node fails at startup, confirm that `ultralytics` is installed and
+that `best.pt` exists in the `object_tracking` package.
+
 ## Development Notes
 
 - Generated workspace folders (`build/`, `install/`, and `log/`) are ignored by
   git.
+- Build `tracking_msg` before running `object_tracking` nodes that import
+  `tracking_msg.msg.Imgtracking`.
 - Use `colcon build --symlink-install` while iterating on Python packages.
 - Source `install/setup.bash` in every new terminal before running package
   commands.

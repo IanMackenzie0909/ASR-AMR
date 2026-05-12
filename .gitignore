@@ -3,9 +3,8 @@
 .env
 build/
 install/
-log/
+*log/
 xpad/
 
 # Python cache files
 *__pycache__/
-object_tracking/__pycache__/
