@@ -1,0 +1,30 @@
+[
+  {
+    "name": "cup_water",
+    "task": "water_level",
+    "x": 0.0,
+    "y": 0.0,
+    "yaw": 0.0
+  },
+  {
+    "name": "multimeter",
+    "task": "multimeter",
+    "x": 0.0,
+    "y": 0.0,
+    "yaw": 0.0
+  },
+  {
+    "name": "tower_light",
+    "task": "tower_light",
+    "x": 0.0,
+    "y": 0.0,
+    "yaw": 0.0
+  },
+  {
+    "name": "baseball",
+    "task": "baseball",
+    "x": 0.0,
+    "y": 0.0,
+    "yaw": 0.0
+  }
+]

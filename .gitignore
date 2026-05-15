@@ -5,6 +5,9 @@ build/
 install/
 *log/
 xpad/
+docs/
 
 # Python cache files
 *__pycache__/
+.agents/
+.codex/

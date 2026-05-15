@@ -119,10 +119,18 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
+If `colcon` only discovers the root `ASR-AMR` wrapper package on this checkout,
+build the ROS packages under `src` explicitly:
+
+```bash
+colcon build --symlink-install --base-paths src
+source install/setup.bash
+```
+
 If you only want to rebuild the project-specific Python packages while working:
 
 ```bash
-colcon build --symlink-install --packages-select \
+colcon build --symlink-install --base-paths src --packages-select \
   robot_controller joy2cmd keyboard_control path_planning tracking_msg object_tracking
 source install/setup.bash
 ```
@@ -256,6 +264,109 @@ ros2 run object_tracking robot_task
 
 `robot_task` stops the robot when target data is stale, no target is visible, or
 depth is invalid. It also stops when the target is closer than `0.35 m`.
+
+## PBL Automatic Inspection Mission
+
+The `pbl_inspection` node runs the Week 14 automatic inspection flow. The
+official task order is fixed:
+
+```text
+START -> A. Cup Water Level Detection -> B. Detect multimeter
+      -> C. Inspect the signal tower light -> D. Detect orange baseball
+      -> START
+```
+
+The robot captures and saves annotated images, publishes live annotated frames,
+and publishes a JSON result as soon as each task is completed.
+
+The mission is time bounded. By default it uses a `175 s` software limit so the
+robot has a small buffer inside the 3 minute competition window. Every result is
+published immediately and also appended to `/tmp/pbl_inspection/live_results.json`;
+the final summary is saved to `/tmp/pbl_inspection/summary.json`.
+
+Tasks supported by the node in competition order:
+
+| Task name | Returned result |
+| --- | --- |
+| `water_level` | Number of cups and each cup's water level rounded to `20`, `40`, `60`, `80`, or `100` percent. |
+| `multimeter` | Number of detected multimeters. Uses YOLO when the model has a multimeter class, otherwise uses an OpenCV fallback. |
+| `tower_light` | Active tower-light color: `red`, `yellow`, or `green`. |
+| `baseball` | The orange baseball bounding box and color. |
+
+If the inspection coordinates are provided during testing, the launch file can
+read a JSON goal list. Keep the JSON order as A -> B -> C -> D:
+
+```bash
+source install/setup.bash
+ros2 launch object_tracking pbl_inspection.launch.py \
+  mission_mode:=fixed \
+  goals_file:=src/object_tracking/config/pbl_goals.example.json
+```
+
+In the competition setting, the task coordinates are not given. Leave the
+example goal coordinates at `0.0` and use the default `mission_mode:=auto`. The
+node switches to search mode, generates a small set of free-space waypoints from
+the Nav2 map, and scans yaw angles at each waypoint. It only runs the detector
+for the current required task, so results are emitted in A -> B -> C -> D order:
+
+```bash
+ros2 launch object_tracking pbl_inspection.launch.py \
+  mission_mode:=auto \
+  mission_time_limit_sec:=175 \
+  return_to_start:=true \
+  search_max_waypoints:=4 \
+  search_yaw_offsets_json:='[0,90,180,-90]' \
+  vision_api_required_tasks_json:='["water_level"]' \
+  vision_api_fallback_tasks_json:='["multimeter"]' \
+  vision_api_max_calls:=4
+```
+
+The Vision API helper uses Gemini. Install `google-genai` and set an API key
+before using real API calls:
+
+```bash
+python3 -m pip install google-genai
+export GEMINI_API_KEY="your_key"
+```
+
+For integration tests that should not consume the free Gemini quota, add
+`vision_api_mock_mode:=true`.
+
+The software time limit defaults to `175 s`, leaving a small buffer inside the
+3 minute competition window. Increase `search_max_waypoints` for better coverage
+or decrease it for a faster but riskier run.
+
+If you want to reorder known fixed task coordinates by travel distance for a
+practice run, explicitly enable it:
+
+```bash
+ros2 launch object_tracking pbl_inspection.launch.py \
+  mission_mode:=fixed \
+  optimize_goal_order:=true \
+  goals_file:=src/object_tracking/config/pbl_goals.example.json
+```
+
+Useful PBL topics:
+
+| Topic | Type | Description |
+| --- | --- | --- |
+| `/pbl_inspection/result` | `std_msgs/msg/String` | One JSON result after each inspection, plus a mission summary. |
+| `/pbl_inspection/annotated_image` | `sensor_msgs/msg/Image` | Latest annotated inspection image for live monitoring in RViz/rqt. |
+
+Live monitoring:
+
+```bash
+ros2 topic echo /pbl_inspection/result
+rqt_image_view /pbl_inspection/annotated_image
+```
+
+Annotated images are also saved to `/tmp/pbl_inspection` by default. For more
+stable water-level detection, calibrate the whole cup area once and pass it as
+`water_roi_json:="[x,y,width,height]"`. If the scene is fixed, you can also pass
+explicit cup boxes with `cup_rois_json:="[[x,y,width,height], ...]"`.
+
+For camera-only testing without moving the AMR, add `-p skip_navigation:=true`.
+With the launch file, use `skip_navigation:=true`.
 
 ## Navigation
 

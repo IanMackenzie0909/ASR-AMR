@@ -1,5 +1,7 @@
 """Packaging configuration for the object tracking ROS 2 Python nodes."""
 
+from glob import glob
+
 from setuptools import find_packages, setup
 
 package_name = 'object_tracking'
@@ -12,6 +14,14 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/config',
+            glob('config/*.json')),
+        ('share/' + package_name + '/launch',
+            glob('launch/*.launch.py')),
+        ('share/' + package_name + '/' + package_name,
+            glob(package_name + '/*.pt') + glob(package_name + '/*.json')),
+        ('share/' + package_name + '/' + package_name + '/pbl/docs',
+            glob(package_name + '/pbl/docs/*.md')),
     ],
     install_requires=['setuptools'],
     package_data={
@@ -32,7 +42,9 @@ setup(
             'object_tracking_img = object_tracking.object_tracking_img:main',
             'hsv_adjust = object_tracking.hsv_adjust:main',
             'robot_task = object_tracking.robot_task:main', # Removed the space here
-            'object_tracking_YOLO = object_tracking.object_tracking_YOLO:main'
+            'object_tracking_YOLO = object_tracking.object_tracking_YOLO:main',
+            'pbl_inspection = object_tracking.pbl.inspection_node:main',
+            'pbl_vision_api = object_tracking.pbl.vision_api_node:main'
         ],
     },
     
