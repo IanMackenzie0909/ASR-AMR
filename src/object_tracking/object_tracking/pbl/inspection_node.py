@@ -1114,11 +1114,11 @@ class PBLInspectionNode(Node):
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         color_ranges = {
             "red": [
-                ((0, 90, 80), (10, 255, 255)),
-                ((170, 90, 80), (179, 255, 255)),
+                ((0, 100, 80), (4, 255, 255)),
+                ((176, 100, 80), (179, 255, 255)),
             ],
-            "yellow": [((18, 80, 80), (38, 255, 255))],
-            "green": [((40, 60, 60), (90, 255, 255))],
+            "yellow": [((18, 90, 90), (32, 255, 255))],
+            "green": [((50, 80, 70), (75, 255, 255))],
         }
 
         best = None
@@ -1172,8 +1172,8 @@ class PBLInspectionNode(Node):
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(
             hsv,
-            np.array((5, 80, 60)),
-            np.array((25, 255, 255)),
+            np.array((6, 120, 100)),
+            np.array((13, 235, 255)),
         )
         mask = self.clean_mask(mask, kernel_size=5)
         contours, _ = cv2.findContours(
@@ -1293,12 +1293,18 @@ class PBLInspectionNode(Node):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         dark = cv2.inRange(gray, 0, 95)
-        yellow = cv2.inRange(
+        dark_teal = cv2.inRange(
             hsv,
-            np.array((18, 55, 70)),
-            np.array((45, 255, 255)),
+            np.array((86, 60, 75)),
+            np.array((94, 190, 180)),
         )
-        mask = cv2.bitwise_or(dark, yellow)
+        orange_case = cv2.inRange(
+            hsv,
+            np.array((6, 120, 140)),
+            np.array((14, 235, 255)),
+        )
+        mask = cv2.bitwise_or(dark, dark_teal)
+        mask = cv2.bitwise_or(mask, orange_case)
         mask = self.clean_mask(mask, kernel_size=7)
         contours, _ = cv2.findContours(
             mask,
@@ -1522,7 +1528,7 @@ class PBLInspectionNode(Node):
         mask = self.water_color_mask(crop)
         ys, _ = np.where(mask > 0)
 
-        method = "blue_cyan_mask"
+        method = "deep_blue_mask"
         raw_percent = None
         waterline_y = None
 
@@ -1556,19 +1562,14 @@ class PBLInspectionNode(Node):
         }
 
     def water_color_mask(self, image):
-        """Return a cleaned mask for the blue/cyan water used in the task."""
+        """Return a cleaned mask for the deep blue water used in the task."""
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        blue = cv2.inRange(
+        deep_blue = cv2.inRange(
             hsv,
-            np.array((85, 45, 45)),
-            np.array((130, 255, 255)),
+            np.array((106, 110, 45)),
+            np.array((113, 220, 155)),
         )
-        cyan = cv2.inRange(
-            hsv,
-            np.array((70, 35, 55)),
-            np.array((100, 255, 255)),
-        )
-        return self.clean_mask(cv2.bitwise_or(blue, cyan), kernel_size=5)
+        return self.clean_mask(deep_blue, kernel_size=5)
 
     def quantize_water_level(self, raw_percent):
         """Map a raw percentage to the allowed 20/40/60/80/100 labels."""
