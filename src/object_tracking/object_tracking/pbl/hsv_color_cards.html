@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PBL HSV 顏色色卡</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d9dee7;
+      --panel: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    h2 { margin: 0 0 12px; font-size: 22px; }
+
+    .note, .task-meta, .hint {
+      color: var(--muted);
+    }
+
+    .note {
+      margin: 0;
+      max-width: 900px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin: 18px 0;
+      padding: 18px;
+    }
+
+    .task-meta { margin: -4px 0 16px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .swatch {
+      min-height: 88px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .water-blue {
+      background: linear-gradient(90deg, #122340, #17273f, #23385f, #304c7b);
+    }
+
+    .dark-body {
+      background: linear-gradient(90deg, #000000, #151515, #303030, #5f5f5f);
+    }
+
+    .meter-teal {
+      background: linear-gradient(90deg, #316360, #357b7c, #3a8482, #4e989e);
+    }
+
+    .meter-orange {
+      background: linear-gradient(90deg, #a64c25, #d75f2b, #ef7643, #ff995c);
+    }
+
+    .tower-red-low {
+      background: linear-gradient(90deg, hsl(0, 72%, 30%), hsl(0, 100%, 45%), hsl(8, 100%, 52%));
+    }
+
+    .tower-red-high {
+      background: linear-gradient(90deg, hsl(352, 72%, 30%), hsl(356, 100%, 45%), hsl(358, 100%, 52%));
+    }
+
+    .tower-yellow {
+      background: linear-gradient(90deg, hsl(36, 72%, 38%), hsl(50, 100%, 50%), hsl(64, 100%, 52%));
+    }
+
+    .tower-green {
+      background: linear-gradient(90deg, hsl(100, 55%, 26%), hsl(120, 85%, 38%), hsl(150, 85%, 42%));
+    }
+
+    .baseball-orange {
+      background: linear-gradient(90deg, #8a3a1f, #c4582b, #f27139);
+    }
+
+    .body { padding: 12px; }
+    .label { font-weight: 700; margin-bottom: 6px; }
+    .hint { margin-top: 8px; font-size: 14px; }
+
+    code {
+      display: block;
+      white-space: pre-wrap;
+      background: #f1f4f8;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: #eef2f7; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>PBL HSV 顏色色卡</h1>
+      <p class="note">
+        這份色卡整理目前 PBL 本地 OpenCV 偵測使用的顏色範圍。HSV 數值為 OpenCV 格式：
+        H = 0-179，S = 0-255，V = 0-255。色條是近似視覺化；實際偵測以程式中的 lower/upper 為準。
+      </p>
+    </header>
+
+    <section>
+      <h2>A. Cup Water Level Detection</h2>
+      <p class="task-meta">
+        水色設定收斂為透光性的寶藍 / 深藍的延伸。
+        此任務目前仍以 Gemini API 為主，本地 HSV 僅作備援與 debug。
+      </p>
+      <div class="grid">
+        <article class="card">
+          <div class="swatch water-blue"></div>
+          <div class="body">
+            <div class="label">A-1 Deep / Royal Blue Water Range</div>
+            <code>lower HSV = (106, 110, 45)
+upper HSV = (113, 220, 155)</code>
+            <div class="hint">由 #15253f、#122340、#2b4776、#2b4575、#23324c 等深藍取色展開。</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>B. Detect Multimeter</h2>
+      <p class="task-meta">
+        三用電錶本地備援由深色機身、墨綠外殼、橘色外殼三種候選組成，再搭配矩形比例與旋鈕圓形特徵。
+      </p>
+      <div class="grid">
+        <article class="card">
+          <div class="swatch dark-body"></div>
+          <div class="body">
+            <div class="label">B-1 Dark Body Range</div>
+            <code>grayscale lower = 0
+grayscale upper = 95</code>
+            <div class="hint">灰階亮度範圍，用於抓黑色 / 深灰色電錶本體。</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="swatch meter-teal"></div>
+          <div class="body">
+            <div class="label">B-2 Dark Teal Case Range</div>
+            <code>lower HSV = (86, 60, 75)
+upper HSV = (94, 190, 180)</code>
+            <div class="hint">由 #357b7c、#316360、#4b696a、#3a8482、#2d8281、#4e989e 等墨綠 / 藍綠取色展開。</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="swatch meter-orange"></div>
+          <div class="body">
+            <div class="label">B-3 Orange Case Range</div>
+            <code>lower HSV = (6, 120, 140)
+upper HSV = (14, 235, 255)</code>
+            <div class="hint">由 #ff995c、#f06f32、#fb8145、#e6743f、#ff7947 等橘色外殼取色展開。</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>C. Inspect The Signal Tower Light</h2>
+      <p class="task-meta">
+        塔燈改為正紅、正黃、正綠展開；黃色允許少量偏橘，紅色不延伸到桃紅，綠色不延伸到天藍。
+      </p>
+      <div class="grid">
+        <article class="card">
+          <div class="swatch tower-red-low"></div>
+          <div class="body">
+            <div class="label">C-1 Red Light Range, Low Hue</div>
+            <code>lower HSV = (0, 100, 80)
+upper HSV = (4, 255, 255)</code>
+            <div class="hint">正紅低 H 段。</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="swatch tower-red-high"></div>
+          <div class="body">
+            <div class="label">C-2 Red Light Range, High Hue</div>
+            <code>lower HSV = (176, 100, 80)
+upper HSV = (179, 255, 255)</code>
+            <div class="hint">正紅高 H 補段，只補紅色環狀端點。</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="swatch tower-yellow"></div>
+          <div class="body">
+            <div class="label">C-3 Yellow Light Range</div>
+            <code>lower HSV = (18, 90, 90)
+upper HSV = (32, 255, 255)</code>
+            <div class="hint">正黃為主，允許一點偏橘。</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="swatch tower-green"></div>
+          <div class="body">
+            <div class="label">C-4 Green Light Range</div>
+            <code>lower HSV = (50, 80, 70)
+upper HSV = (75, 255, 255)</code>
+            <div class="hint">正綠範圍。</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>D. Detect Orange Baseball</h2>
+      <p class="task-meta">
+        橘色棒球改為單一橘色取樣展開，允許變髒或環境變暗造成的深橘 / 棕橘。
+      </p>
+      <div class="grid">
+        <article class="card">
+          <div class="swatch baseball-orange"></div>
+          <div class="body">
+            <div class="label">D-1 Dirty / Deep Orange Baseball Range</div>
+            <code>lower HSV = (6, 120, 100)
+upper HSV = (13, 235, 255)</code>
+            <div class="hint">由 #f27139 取色展開，後續仍搭配輪廓面積與圓度避免抓到背景。</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>總表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>任務</th>
+            <th>項目</th>
+            <th>範圍</th>
+            <th>程式用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A</td>
+            <td>Deep / Royal Blue Water</td>
+            <td>HSV (106,110,45) - (113,220,155)</td>
+            <td>水位備援偵測</td>
+          </tr>
+          <tr>
+            <td>B</td>
+            <td>Dark Body</td>
+            <td>Gray 0 - 95</td>
+            <td>三用電錶深色本體候選</td>
+          </tr>
+          <tr>
+            <td>B</td>
+            <td>Dark Teal Case</td>
+            <td>HSV (86,60,75) - (94,190,180)</td>
+            <td>三用電錶墨綠外殼候選</td>
+          </tr>
+          <tr>
+            <td>B</td>
+            <td>Orange Case</td>
+            <td>HSV (6,120,140) - (14,235,255)</td>
+            <td>三用電錶橘色外殼候選</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td>Red Low</td>
+            <td>HSV (0,100,80) - (4,255,255)</td>
+            <td>塔燈紅色</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td>Red High</td>
+            <td>HSV (176,100,80) - (179,255,255)</td>
+            <td>塔燈紅色補段</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td>Yellow</td>
+            <td>HSV (18,90,90) - (32,255,255)</td>
+            <td>塔燈黃色，允許一點橘</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td>Green</td>
+            <td>HSV (50,80,70) - (75,255,255)</td>
+            <td>塔燈綠色</td>
+          </tr>
+          <tr>
+            <td>D</td>
+            <td>Dirty / Deep Orange</td>
+            <td>HSV (6,120,100) - (13,235,255)</td>
+            <td>橘色棒球候選</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
